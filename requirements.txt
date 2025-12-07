@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+yt-dlp
+ollama
+python-dotenv
+python-multipart
+pywhispercpp
