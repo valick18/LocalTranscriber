@@ -1,26 +1,31 @@
-# Content Transcriber (Local Backend)
+# LocalTranscriber (100% Local Backend)
 
-A powerful local video transcription and chat server using OpenAI's **Whisper** (via pywhispercpp) and **Groq** (for AI chat).
+A powerful, **fully private** local video transcription and chat server.
+It uses **Whisper** (via pywhispercpp) for transcription and **Ollama** (Llama 3, Mistral, etc.) for AI chat.
+No cloud APIs. No data leaves your machine.
 
 ## Features
 
--   **Local Transcription**: Uses `whisper.cpp` (via `pywhispercpp`) for high-performance, private transcription.
--   **Multilingual Support**: Supports transcribing 50+ languages (default: Russian).
--   **AI Chat**: Chat with the content of your video using Llama 3 (via Groq API).
--   **Security**: Protected by API Key authentication.
--   **Configurable**: Easily switch between Whisper model sizes (base, small, large-v3) based on your hardware.
+-   **100% Local**: No External APIs. Complete Privacy.
+-   **Local Transcription**: High-performance transcription using `whisper.cpp`.
+-   **Local Chat**: Ask questions about the video using your local Ollama LLM.
+-   **Multilingual**: Supports 50+ languages (default: Russian).
+-   **Secure**: Protected by API Key authentication (`x-api-key`).
+-   **Configurable**: Run on low-end (`base` model) or high-end (`large-v3`) hardware.
 
 ## Prerequisites
 
--   **Python 3.10+**
--   **FFmpeg**: Must be installed and added to PATH. (Used for audio extraction).
+1.  **Python 3.10+**
+2.  **FFmpeg**: Must be installed and added to PATH.
+3.  **Ollama**: Download from [ollama.com](https://ollama.com).
+    -   Run `ollama pull llama3` (or your preferred model) before starting.
 
 ## Installation
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/transcriber_local.git
-    cd transcriber_local
+    git clone https://github.com/valick18/LocalTranscriber.git
+    cd LocalTranscriber
     ```
 
 2.  Create a virtual environment:
@@ -45,9 +50,9 @@ A powerful local video transcription and chat server using OpenAI's **Whisper** 
     ```
 
 2.  Edit `.env` and set your variables:
-    -   `GROQ_API_KEY`: Get one from [console.groq.com](https://console.groq.com).
-    -   `API_SECRET_KEY`: **Important!** Set a strong password here. This protects your server.
-    -   `WHISPER_MODEL_NAME`: Choose `base` (fast, low RAM) or `large-v3` (high accuracy, high RAM).
+    -   `API_SECRET_KEY`: **REQUIRED**. Create a password to protect your server.
+    -   `WHISPER_MODEL_NAME`: `large-v3` (Best quality, high RAM) or `base` (Fast, low RAM).
+    -   `OLLAMA_MODEL`: `llama3` (or `mistral`, `gemma`, etc.).
 
 ## Usage
 
@@ -55,16 +60,13 @@ A powerful local video transcription and chat server using OpenAI's **Whisper** 
     ```bash
     # Windows
     start_backend.bat
-    # Or manually:
-    uvicorn main:app --reload --host 0.0.0.0 --port 8000
     ```
 
-2.  The server will be available at `http://localhost:8000`.
+2.  The server runs at `http://localhost:8000`.
 
 ## API Documentation
 
-All API endpoints start with `/api/`.
-You **MUST** include the header `x-api-key: YOUR_SECRET_KEY` in every request.
+**Auth**: Header `x-api-key: YOUR_SECRET_KEY` is required for all requests.
 
 ### `POST /api/process`
 Start transcribing a YouTube URL.
@@ -78,12 +80,12 @@ Check job status.
 Get the final transcript.
 
 ### `POST /api/chat`
-Ask a question about the video.
+Ask a question about the video (Requires running Ollama).
 -   **Body**: `{"job_id": "...", "question": "..."}`
 
-## Security
+## Deployment (Docker)
 
-This server is protected by a simple API Key mechanism.
--   The `main.py` middleware checks for the `x-api-key` header.
--   If the header is missing or does not match `API_SECRET_KEY` in `.env`, the request is rejected (403 Forbidden).
--   **Do not share your API_SECRET_KEY**.
+You can deploy this as a Docker container.
+1.  Make sure your host machine allows nested virtualization or CPU inference if no GPU.
+2.  `docker build -t local-transcriber .`
+3.  `docker run -p 8000:8000 --env-file .env local-transcriber`
